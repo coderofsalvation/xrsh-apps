@@ -4,7 +4,9 @@ AFRAME.registerComponent('helloworld-html', {
   },
 
   init: function () {  
+    this.el.addEventListener('ready', () => { // wait for requirements
 
+    })
   },
 
   requires:{
@@ -20,6 +22,7 @@ AFRAME.registerComponent('helloworld-html', {
 
     css:     `.helloworld-html {
                 color: var(--xrsh-dark-gray); /* see index.css */
+                width:300px;
               }
               `,
   },
@@ -28,7 +31,6 @@ AFRAME.registerComponent('helloworld-html', {
 
     // component events
     html:     function( ){ console.log("html-mesh requirement mounted") },
-    ready:    function(e){ console.log("requires are loaded") },
 
     // combined AFRAME+DOM reactive events
     keydown: function(e){ }, // 

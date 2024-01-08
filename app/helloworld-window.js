@@ -4,28 +4,32 @@ AFRAME.registerComponent('helloworld-window', {
   },
 
   init: function () {  
-
+    this.el.addEventListener('ready', () => { // wait for requirements
+      new WinBox("Hello World",{ 
+        width: 250,
+        height: 150,
+        x:"center",
+        y:"center",
+        id:  this.el.uid, // important hint for html-mesh  
+        root: document.querySelector("#overlay"),
+        mount: this.el.dom 
+      });
+    })
   },
 
   requires:{
     html:        "https://unpkg.com/aframe-htmlmesh@2.1.0/build/aframe-html.js",  // html to AFRAME
     winboxjs:    "https://unpkg.com/winbox@0.2.82/dist/winbox.bundle.min.js",     // deadsimple windows: https://nextapps-de.github.io/winbox
     winboxcss:   "https://unpkg.com/winbox@0.2.82/dist/css/winbox.min.css",       // deadsimple windows: https://nextapps-de.github.io/winbox
-    stylis:      "https://unpkg.com/stylis@4.3.1/dist/umd/stylis.js",             // modern CSS (https://stylis.js.org)
   },
 
   dom: {
     scale:   3,
     events:  ['click','keydown'],
     html:    (me) => `<div>
-                        <div class="pad"> ${me.data.foo} <b>${me.data.myvalue}</b></span>
+                        <div> ${me.data.foo} <b>${me.data.myvalue}</b></span>
                       </div>`,
-    css:     `.helloworld-window {
-                div {
-                  .pad { padding:11px; }
-                }
-              }
-              `,
+    css:     `.helloworld-window > div { padding:11px}`,
   },
 
   events:{
@@ -40,23 +44,6 @@ AFRAME.registerComponent('helloworld-window', {
 
     // reactive events for this.data updates 
     myvalue: function(e){ this.el.dom.querySelector('b').innerText = this.data.myvalue },
-
-    // requires are loaded
-    ready: function(e){
-
-      setTimeout( () => {
-        new WinBox("Hello World",{ 
-          width: 250,
-          height: 150,
-          x:"center",
-          y:"center",
-          id:  this.el.uid, // important hint for html-mesh  
-          root: document.querySelector("#overlay"),
-          mount: this.el.dom 
-        });
-      }, 500 )
-
-    },
 
     DOMready: function( ){ 
       console.log("this.el.dom has been added to DOM")

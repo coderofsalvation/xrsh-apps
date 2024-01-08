@@ -4,7 +4,14 @@ AFRAME.registerComponent('helloworld', {
   },
 
   init: function () {  
-    this.el.setAttribute("geometry","primitive: octahedron")
+    this.el.addEventListener('ready', () => { // wait for requirements
+      this.el.setAttribute("geometry","primitive: octahedron")
+
+      // just a reactive demonstration, use tick() for serious animation
+      setInterval( () => { 
+        this.data.myvalue = ((this.data.myvalue||1.0) + 0.25) % 1
+      }, 400 )
+    })
   },
 
   requires:{
@@ -14,8 +21,10 @@ AFRAME.registerComponent('helloworld', {
   events:{
 
     // component events
-    somecomponent: function( ){ console.log("component requirement mounted") },
-    ready:         function(e){ console.log("requires are loaded") },
+    mycom:  function( ){ console.log("component requirement mounted") },
+
+    // reactive this.data values
+    myvalue:function( ){ this.el.object3D.children[0].scale.y = this.data.myvalue }
 
   },
 

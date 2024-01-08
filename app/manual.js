@@ -4,7 +4,20 @@ AFRAME.registerComponent('manual', {
   },
 
   init: function () {  
-      //AFRAME.XRF.navigator.to("https://coderofsalvation.github.io/xrsh-media/assets/background.glb")
+    this.el.addEventListener('ready', () => { // wait for requirements
+      new WinBox("XRSH manual",{ 
+        width:300,
+        height:300,
+        x:"center",
+        y:"center",
+        id:  this.el.uid, // important hint for html-mesh  
+        root: document.querySelector("#overlay"),
+        mount: this.el.dom 
+      });
+
+      this.el.setAttribute("xrf","https://coderofsalvation.github.io/xrsh-media/assets/background.glb")
+      // navigate with: AFRAME.XRF.navigator.to("https://xrfragment.org/index.glb")
+    })
   },
 
   requires:{
@@ -20,12 +33,27 @@ AFRAME.registerComponent('manual', {
     html:    (me) => `<div>
 
                   <h1>Welcome to XRSHell</h1>
-                  <br>
-                  <!-- <img src="https://i.imgur.com/BW22wrb.png"/> -->
+                  The xrsh (xr shell) brings the <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a>-<br>
+                  and <a href="https://en.wikipedia.org/wiki/Linux" target="_blank">Linux</a>-soul to <a href="https://en.wikipedia.org/wiki/WebXR" target="_blank">WebXR</a>,<br>
+                  promoting the use of (interactive text)<br>
+                  terminal and user-provided operating<br>
+                  systems inside WebXR.<br>
                   <br><br>
-                  The <b>xrsh</b> (xrshell) brings the <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a>- and <a href="https://en.wikipedia.org/wiki/Linux" target="_blank">Linux</a>-soul to <a href="https://en.wikipedia.org/wiki/WebXR" target="_blank">WebXR</a>, promoting the use of (interactive text) terminal and user-provided operating systems inside WebXR.
-                  <br><br>Technically, <b>xrsh</b> is a bundle of freshly created re-usable FOSS WebXR components.<br>These provide a common filesystem interface for interacting with WebXR, offering the well-known linux/unix toolchain including a commandline to invoke, store, edit and run WebXR utilities - regardless of their implementation.
-                  <br><br>Think of it as termux for the VR/AR headset browser, which can be used to e.g. livecode (using terminal auto-completion!) for XR component (registries).                
+                  Technically, <b>xrsh</b> is a bundle<br>
+                  of freshly created re-usable FOSS <br>
+                  WebXR components.<br>
+                  These provide a common filesystem <br>
+                  interface for interacting with WebXR,<br>
+                  offering the well-known <br>
+                  linux/unix toolchain including a <br>
+                  commandline to invoke,<br>
+                  store, edit and run WebXR utilities, 
+                  <br> regardless of their implementation.<br>
+                  <br><br>
+                  Think of it as termux for the VR/AR<br>
+                  headset browser, which can be used to e.g.<br>
+                  livecode (using terminal auto-completion!)<br>
+                  for XR component (registries).                
 
                   <br>
                   <ul>
@@ -35,12 +63,7 @@ AFRAME.registerComponent('manual', {
                   </ul>
 
                       </div>`,
-    css:     `.manual {
-                div {
-                  padding:11px;
-                }
-              }
-              `,
+    css:     `.manual > div { padding:11px; }`
   },
 
   events:{
@@ -53,32 +76,8 @@ AFRAME.registerComponent('manual', {
     click:   function(e){ }, // 
     keydown: function(e){ }, // 
 
-    // reactive events for this.data updates 
-    myvalue: function(e){ this.el.dom.querySelector('b').innerText = this.data.myvalue },
-
-    // requires are loaded
-    ready: function(e){
-
-      setTimeout( () => {
-        new WinBox("XRSH manual",{ 
-          width:300,
-          height:300,
-          x:"center",
-          y:"center",
-          id:  this.el.uid, // important hint for html-mesh  
-          root: document.querySelector("#overlay"),
-          mount: this.el.dom 
-        });
-      }, 500 )
-
-      this.el.setAttribute("xrf","https://coderofsalvation.github.io/xrsh-media/assets/background.glb")
-      // navigate with: AFRAME.XRF.navigator.to("https://xrfragment.org/index.glb")
-    },
-
     DOMready: function( ){ 
       console.log("this.el.dom has been added to DOM")
-      this.data.myvalue = 1
-      setInterval( () => this.data.myvalue++, 100 )
     }
 
   },

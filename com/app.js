@@ -23,12 +23,27 @@ AFRAME.registerComponent('app', {
   },
 
   events:{
+
     "app:ready": function(){
       let {id,component,type} = this.parseAppURI(this.data.uri)
       AFRAME.app[component].map( (app) => {
-        if( !app.el.getAttribute(component) ) app.el.setAttribute(component,app.data)
+        if( !app.el.getAttribute(component) ) app.el.setAttribute(component,app.data) // finally mount the component (referenced by uri: )
       }) 
-    }
+    },
+
+    "requires:ready": function(){
+      let {id,component,type} = this.parseAppURI(this.data.uri)
+      AFRAME.app[component].map( (app) => {
+        if( app.readyFired ) return
+        setTimeout( () => {
+          app.el.emit('ready')
+          app.readyFired = true
+          if( this.el.dom ) this.el.dom.style.display = '' // finally show dom elements
+        },400) // big js scripts need some parsing time
+      }) 
+    },
+
+
   },
 
   init: function() { 
@@ -58,6 +73,7 @@ AFRAME.registerComponent('app', {
         // prevent duplicate requests
         if( AFRAME.required[id] ) return
         AFRAME.required[id] = true 
+        console.log(package)
 
         if( !document.head.querySelector(`script#${id}`) ){
           let {component,type} = this.parseAppURI(package)
@@ -83,7 +99,9 @@ AFRAME.registerComponent('app', {
         }
       }catch(e){ console.error(`package ${package} could not be retrieved..aborting :(`); throw e; }
     })
-    Promise.all(deps).then( () => this.el.emit( readyEvent||'ready', packages) )
+    Promise.all(deps).then( () => {
+      this.el.emit( readyEvent || 'requireReady', packages) 
+    })
   }
 
 })
@@ -109,7 +127,6 @@ AFRAME.AComponent.prototype.updateProperties = function(updateProperties){
   return function(){
     updateProperties.apply(this,arguments)
 
-
     const reactify = (el,aframe) => new Proxy(this.data,{
       get(me,k,v)  { return me[k] 
       },
@@ -119,10 +136,14 @@ AFRAME.AComponent.prototype.updateProperties = function(updateProperties){
       }
     })
 
-    if( !this.data  ) return
+    if( !this.data || !this.data.uri  ) return // only deal with apps
+
+    if( !this.dom ){
+      this.data = reactify( null, this.el )
+    }
 
     // reactify components with dom-definition
-    if( this.data.uri && this.dom && !this.el.dom ){
+    if( this.dom && !this.el.dom ){
 
       tasks = {
 
@@ -140,8 +161,9 @@ AFRAME.AComponent.prototype.updateProperties = function(updateProperties){
 
         createReactiveDOMElement: () => {
           this.el.dom = document.createElement('div')
-          this.el.dom.className = this.parseAppURI(this.data.uri).component
-          this.el.dom.innerHTML = this.dom.html(this)
+          this.el.dom.className     = this.parseAppURI(this.data.uri).component
+          this.el.dom.innerHTML     = this.dom.html(this)
+          this.el.dom.style.display = 'none'
           this.data = reactify( this.dom.el, this.el )
           this.dom.events.map( (e) => this.el.dom.addEventListener(e, (ev) => this.el.emit(e,ev) ) )
           return tasks
@@ -159,20 +181,27 @@ AFRAME.AComponent.prototype.updateProperties = function(updateProperties){
           return tasks
         },
 
-        requireDependencies: () => {
-          this.require( this.requires )
-          return tasks
-        },
-
         setupListeners: () => {
           this.scene.addEventListener('apps:2D', () => this.el.setAttribute('visible', false) )
           this.scene.addEventListener('apps:XR', () => {
-            console.log("JAXR")
             this.el.setAttribute('visible', true) 
             this.el.setAttribute("html",`html:#${this.el.uid}; cursor:#cursor`)
           })
           return tasks
+        },
+
+        triggerKeyboardForInputs: () => {
+          // https://developer.oculus.com/documentation/web/webxr-keyboard ;
+          [...this.el.dom.querySelectorAll('[type=text]')].map( (input) => {
+            let triggerKeyboard = function(){
+              this.focus()
+              console.log("focus")
+            }
+            input.addEventListener('click', triggerKeyboard )
+          })
+          return tasks
         }
+
 
       }
 
@@ -181,7 +210,7 @@ AFRAME.AComponent.prototype.updateProperties = function(updateProperties){
       .addCSS()
       .createReactiveDOMElement()
       .scaleDOMvsXR()
-      .requireDependencies()
+      .triggerKeyboardForInputs()
       .setupListeners()
 
       tasks.overlay.appendChild(this.el.dom)
@@ -190,6 +219,10 @@ AFRAME.AComponent.prototype.updateProperties = function(updateProperties){
     } 
     // assign unique app id
     if( !this.el.uid ) this.el.uid = '_'+String(Math.random()).substr(10)
+
+    // fetch requires
+    if( this.requires ) this.require( this.requires, 'requires:ready' )
+    else this.el.emit('requires:ready')
   }
 }( AFRAME.AComponent.prototype.updateProperties)
 

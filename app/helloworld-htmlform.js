@@ -4,14 +4,27 @@ AFRAME.registerComponent('helloworld-htmlform', {
   },
 
   init: function () {  
-
+    this.el.addEventListener('ready', () => { // wait for requirements
+      new WinBox("Hello World",{ 
+        width: 250,
+        height: 380,
+        minwidth:250,
+        maxwidth:250,
+        maxheight:380,
+        minheight:380,
+        x: 100,
+        y: 100,
+        id:  this.el.uid, // important hint for html-mesh  
+        root: document.querySelector("#overlay"),
+        mount: this.el.dom 
+      });
+    })
   },
 
   requires:{
     html:        "https://unpkg.com/aframe-htmlmesh@2.1.0/build/aframe-html.js",  // html to AFRAME
     winboxjs:    "https://unpkg.com/winbox@0.2.82/dist/winbox.bundle.min.js",     // deadsimple windows: https://nextapps-de.github.io/winbox
     winboxcss:   "https://unpkg.com/winbox@0.2.82/dist/css/winbox.min.css",       // deadsimple windows: https://nextapps-de.github.io/winbox
-    stylis:      "https://unpkg.com/stylis@4.3.1/dist/umd/stylis.js",             // modern CSS (https://stylis.js.org)
   },
 
   dom: {
@@ -24,8 +37,12 @@ AFRAME.registerComponent('helloworld-htmlform', {
                           <input type="radio" id="color-blue" name="color" value="blue"><label for="color-blue"> Blue</label><br>
                         </fieldset>
                         <fieldset>
+                          <legend>Field:</legend>
+                          <input id="field" type="text" name="text">
+                        </fieldset>
+                        <fieldset>
                           <legend>Material:</legend>
-                          <input id="material-wireframe" type="checkbox" name="wireframe"><label for="material-wireframe"> Wireframe</label><br>
+                          <input id="wireframe" type="checkbox" name="wireframe"><label for="wireframe"> Wireframe</label><br>
                         </fieldset>
                         <fieldset>
                           <legend>Size: <span id="myvalue"></span></legend>
@@ -33,12 +50,7 @@ AFRAME.registerComponent('helloworld-htmlform', {
                         </fieldset>
                         <button>hello</button>
                       </div>`,
-    css:     `.helloworld-htmlform {
-                div {
-                  padding:11px;
-                }
-              }
-              `,
+    css:     `.helloworld-htmlform > div { padding:11px }`
   },
 
   events:{
@@ -56,26 +68,6 @@ AFRAME.registerComponent('helloworld-htmlform', {
 
     // reactive events for this.data updates 
     myvalue: function(e){ this.el.dom.querySelector('#myvalue').innerText = this.data.myvalue },
-
-    // requires are loaded
-    ready: function(e){
-      setTimeout( () => {
-        new WinBox("Hello World",{ 
-          width: 250,
-          height: 315,
-          minwidth:250,
-          maxwidth:250,
-          maxheight:315,
-          minheight:315,
-          x: 100,
-          y: 100,
-          id:  this.el.uid, // important hint for html-mesh  
-          root: document.querySelector("#overlay"),
-          mount: this.el.dom 
-        });
-      },500) /*FIXME*/
-
-    },
 
     DOMready: function( ){ 
       console.log("this.el.dom has been added to DOM")
